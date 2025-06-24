@@ -1,199 +1,210 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Edit, Plus, Check, X, Trophy, User, Hash, Target, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Trophy, User, Hash, Target, TrendingUp, Clock, CheckCircle, XCircle, Brain, Map, Share, Download, RefreshCw, FileText } from 'lucide-react';
 
-// Mock student data
-const studentData = {
-  name: "Alex Johnson",
-  grade: "10th Grade",
-  rollNumber: "2024-A-101",
-  totalMarks: 847,
-  maxMarks: 1000,
-  rank: 12,
-  percentage: 84.7
-};
-
-// Mock subject data with topics and chapters
-const subjectData = {
-  maths: {
-    name: "Mathematics",
-    topics: [
-      {
-        name: "Algebra",
-        chapters: [
-          { name: "Linear Equations", correct: 8, incorrect: 2, feedback: "Great understanding of basic concepts!" },
-          { name: "Quadratic Equations", correct: 6, incorrect: 4, feedback: "" },
-          { name: "Polynomial Functions", correct: 5, incorrect: 5, feedback: "Need more practice with complex polynomials" }
-        ]
-      },
-      {
-        name: "Geometry",
-        chapters: [
-          { name: "Triangles", correct: 9, incorrect: 1, feedback: "Excellent work on triangle properties" },
-          { name: "Circles", correct: 7, incorrect: 3, feedback: "" },
-          { name: "Coordinate Geometry", correct: 4, incorrect: 6, feedback: "" }
-        ]
-      },
-      {
-        name: "Statistics",
-        chapters: [
-          { name: "Mean & Median", correct: 8, incorrect: 2, feedback: "Strong grasp of central tendencies" },
-          { name: "Probability", correct: 3, incorrect: 7, feedback: "" }
-        ]
-      }
-    ]
+// Mock analyzed data (would come from PTS Report Card in real app)
+const battleResults = {
+  student: {
+    name: "Priya Sharma",
+    mockNo: "PTS-2024-15",
+    rank: 45,
+    totalMarks: 156,
+    maxMarks: 200,
+    percentile: 78.5,
+    totalTime: 180, // minutes
+    overallAccuracy: 78
   },
-  english: {
-    name: "English",
-    topics: [
-      {
-        name: "Grammar",
-        chapters: [
-          { name: "Tenses", correct: 9, incorrect: 1, feedback: "Perfect understanding of verb tenses" },
-          { name: "Voice & Speech", correct: 6, incorrect: 4, feedback: "" },
-          { name: "Prepositions", correct: 7, incorrect: 3, feedback: "Good progress, keep practicing" }
-        ]
-      },
-      {
-        name: "Literature",
-        chapters: [
-          { name: "Poetry Analysis", correct: 5, incorrect: 5, feedback: "" },
-          { name: "Prose Comprehension", correct: 8, incorrect: 2, feedback: "Excellent analytical skills" }
-        ]
-      }
-    ]
-  },
-  science: {
-    name: "Science",
-    topics: [
-      {
-        name: "Physics",
-        chapters: [
-          { name: "Motion & Force", correct: 7, incorrect: 3, feedback: "Good understanding of mechanics" },
-          { name: "Energy & Power", correct: 6, incorrect: 4, feedback: "" },
-          { name: "Electricity", correct: 4, incorrect: 6, feedback: "" }
-        ]
-      },
-      {
-        name: "Chemistry",
-        chapters: [
-          { name: "Atomic Structure", correct: 8, incorrect: 2, feedback: "Strong foundation in atomic theory" },
-          { name: "Chemical Bonding", correct: 5, incorrect: 5, feedback: "" }
-        ]
-      },
-      {
-        name: "Biology",
-        chapters: [
-          { name: "Cell Structure", correct: 9, incorrect: 1, feedback: "Outstanding grasp of cellular biology" },
-          { name: "Genetics", correct: 6, incorrect: 4, feedback: "" }
-        ]
-      }
-    ]
+  subjects: {
+    maths: {
+      name: "Mathematics",
+      icon: "📐",
+      color: "blue",
+      totalQuestions: 48,
+      attempted: 45,
+      correct: 32,
+      incorrect: 13,
+      timeSpent: 52,
+      totalMarks: 48,
+      accuracy: 71,
+      status: "Good",
+      strongChapters: ["Percentage", "Average", "Number System"],
+      weakChapters: ["Geometry", "Trigonometry", "Data Interpretation"],
+      chapters: [
+        { name: "Percentage", correct: 3, incorrect: 0, status: "excellent" },
+        { name: "Profit Loss & Discount", correct: 2, incorrect: 1, status: "good" },
+        { name: "Geometry", correct: 1, incorrect: 2, status: "weak" },
+        { name: "Trigonometry", correct: 0, incorrect: 3, status: "weak" },
+        { name: "Average", correct: 3, incorrect: 0, status: "excellent" }
+      ]
+    },
+    english: {
+      name: "English",
+      icon: "📖",
+      color: "purple",
+      totalQuestions: 30,
+      attempted: 28,
+      correct: 24,
+      incorrect: 4,
+      timeSpent: 35,
+      totalMarks: 36,
+      accuracy: 86,
+      status: "Excellent",
+      strongChapters: ["Grammar", "Reading Comprehension", "Synonyms"],
+      weakChapters: ["Cloze Test"],
+      chapters: [
+        { name: "Error Spotting", correct: 4, incorrect: 1, status: "good" },
+        { name: "Reading Comprehension", correct: 5, incorrect: 0, status: "excellent" },
+        { name: "Cloze Test", correct: 2, incorrect: 3, status: "weak" },
+        { name: "Synonyms", correct: 4, incorrect: 0, status: "excellent" }
+      ]
+    },
+    reasoning: {
+      name: "Reasoning",
+      icon: "🧠",
+      color: "orange",
+      totalQuestions: 35,
+      attempted: 33,
+      correct: 26,
+      incorrect: 7,
+      timeSpent: 45,
+      totalMarks: 39,
+      accuracy: 79,
+      status: "Good",
+      strongChapters: ["Number Series", "Analogy", "Blood Relation"],
+      weakChapters: ["Syllogism", "Coding Decoding"],
+      chapters: [
+        { name: "Number Series", correct: 4, incorrect: 0, status: "excellent" },
+        { name: "Syllogism", correct: 1, incorrect: 3, status: "weak" },
+        { name: "Analogy", correct: 3, incorrect: 1, status: "good" },
+        { name: "Coding Decoding", correct: 2, incorrect: 3, status: "weak" }
+      ]
+    },
+    gkgs: {
+      name: "GK/GS",
+      icon: "🌍",
+      color: "green",
+      totalQuestions: 25,
+      attempted: 23,
+      correct: 16,
+      incorrect: 7,
+      timeSpent: 28,
+      totalMarks: 24,
+      accuracy: 70,
+      status: "Good",
+      strongChapters: ["History", "Static GK"],
+      weakChapters: ["Current Affairs", "Economics"],
+      chapters: [
+        { name: "History", correct: 4, incorrect: 1, status: "good" },
+        { name: "Current Affairs", correct: 1, incorrect: 3, status: "weak" },
+        { name: "Static GK", correct: 3, incorrect: 0, status: "excellent" },
+        { name: "Economics", correct: 2, incorrect: 3, status: "weak" }
+      ]
+    }
   }
 };
 
 const BattleAnalysis = () => {
-  const [editingFeedback, setEditingFeedback] = useState(null);
-  const [feedbackData, setFeedbackData] = useState(subjectData);
+  const [expandedSubject, setExpandedSubject] = useState(null);
 
-  const getPerformanceColor = (correct, incorrect) => {
-    const total = correct + incorrect;
-    const percentage = (correct / total) * 100;
-    if (percentage >= 80) return 'bg-green-500';
-    if (percentage >= 60) return 'bg-yellow-500';
-    return 'bg-red-500';
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'excellent': return 'bg-green-100 text-green-800 border-green-200';
+      case 'good': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'weak': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
   };
 
-  const getPerformanceStatus = (correct, incorrect) => {
-    const total = correct + incorrect;
-    const percentage = (correct / total) * 100;
-    if (percentage >= 80) return { text: 'Excellent', color: 'bg-green-100 text-green-800' };
-    if (percentage >= 60) return { text: 'Good', color: 'bg-yellow-100 text-yellow-800' };
-    return { text: 'Needs Work', color: 'bg-red-100 text-red-800' };
+  const getChipColor = (status) => {
+    switch (status) {
+      case 'excellent': return 'bg-green-500';
+      case 'good': return 'bg-yellow-500';
+      case 'weak': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
   };
 
-  const handleFeedbackSave = (subject, topicIndex, chapterIndex, newFeedback) => {
-    setFeedbackData(prev => ({
-      ...prev,
-      [subject]: {
-        ...prev[subject],
-        topics: prev[subject].topics.map((topic, tIdx) => 
-          tIdx === topicIndex 
-            ? {
-                ...topic,
-                chapters: topic.chapters.map((chapter, cIdx) =>
-                  cIdx === chapterIndex 
-                    ? { ...chapter, feedback: newFeedback }
-                    : chapter
-                )
-              }
-            : topic
-        )
-      }
-    }));
-    setEditingFeedback(null);
-  };
-
-  const calculateTopicProgress = (chapters) => {
-    const totalQuestions = chapters.reduce((sum, ch) => sum + ch.correct + ch.incorrect, 0);
-    const totalCorrect = chapters.reduce((sum, ch) => sum + ch.correct, 0);
-    return totalQuestions > 0 ? (totalCorrect / totalQuestions) * 100 : 0;
+  const getSubjectStatusColor = (status) => {
+    switch (status) {
+      case 'Excellent': return 'bg-green-100 text-green-800';
+      case 'Good': return 'bg-blue-100 text-blue-800';
+      case 'Needs Work': return 'bg-red-100 text-red-800';
+      default: return 'bg-yellow-100 text-yellow-800';
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
-      {/* Sticky Student Summary */}
-      <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-sm border-b border-purple-100 shadow-sm">
-        <div className="container mx-auto px-4 py-4">
-          <Card className="bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0">
+      {/* Battle Victory Banner */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-blue-600 to-green-600 opacity-90"></div>
+        <div className="relative z-10 container mx-auto px-4 py-12">
+          <div className="text-center text-white mb-8">
+            <div className="inline-block animate-bounce mb-4">
+              <div className="text-6xl">🏆</div>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-2">Battle Completed!</h1>
+            <p className="text-xl opacity-90">Victory Analysis Report</p>
+          </div>
+
+          <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
             <CardContent className="p-6">
               <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
                 <div className="flex items-center gap-2">
-                  <User className="w-5 h-5 text-purple-200" />
+                  <User className="w-5 h-5 text-purple-600" />
                   <div>
-                    <p className="text-sm text-purple-200">Student</p>
-                    <p className="font-semibold">{studentData.name}</p>
+                    <p className="text-sm text-gray-600">Warrior</p>
+                    <p className="font-bold text-gray-800">{battleResults.student.name}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Hash className="w-5 h-5 text-purple-200" />
+                  <Hash className="w-5 h-5 text-purple-600" />
                   <div>
-                    <p className="text-sm text-purple-200">Grade</p>
-                    <p className="font-semibold">{studentData.grade}</p>
+                    <p className="text-sm text-gray-600">Battle ID</p>
+                    <p className="font-bold text-gray-800">{battleResults.student.mockNo}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Target className="w-5 h-5 text-purple-200" />
+                  <Trophy className="w-5 h-5 text-yellow-600" />
                   <div>
-                    <p className="text-sm text-purple-200">Roll No.</p>
-                    <p className="font-semibold">{studentData.rollNumber}</p>
+                    <p className="text-sm text-gray-600">Rank</p>
+                    <p className="font-bold text-gray-800">#{battleResults.student.rank}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Check className="w-5 h-5 text-purple-200" />
+                  <Target className="w-5 h-5 text-blue-600" />
                   <div>
-                    <p className="text-sm text-purple-200">Total Marks</p>
-                    <p className="font-semibold">{studentData.totalMarks}/{studentData.maxMarks}</p>
+                    <p className="text-sm text-gray-600">Score</p>
+                    <p className="font-bold text-gray-800">{battleResults.student.totalMarks}/{battleResults.student.maxMarks}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Trophy className="w-5 h-5 text-purple-200" />
+                  <TrendingUp className="w-5 h-5 text-green-600" />
                   <div>
-                    <p className="text-sm text-purple-200">Rank</p>
-                    <p className="font-semibold">#{studentData.rank}</p>
+                    <p className="text-sm text-gray-600">Percentile</p>
+                    <p className="font-bold text-gray-800">{battleResults.student.percentile}%</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-purple-200" />
+                  <Clock className="w-5 h-5 text-orange-600" />
                   <div>
-                    <p className="text-sm text-purple-200">Percentage</p>
-                    <p className="font-semibold">{studentData.percentage}%</p>
+                    <p className="text-sm text-gray-600">Time</p>
+                    <p className="font-bold text-gray-800">{battleResults.student.totalTime}min</p>
                   </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 text-center">
+                <div className="inline-flex items-center gap-4 bg-gradient-to-r from-green-100 to-blue-100 px-6 py-3 rounded-full">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <span className="text-lg font-semibold text-gray-800">
+                    Overall Accuracy: {battleResults.student.overallAccuracy}%
+                  </span>
                 </div>
               </div>
             </CardContent>
@@ -201,192 +212,203 @@ const BattleAnalysis = () => {
         </div>
       </div>
 
-      {/* Main Content with Tabs */}
-      <div className="container mx-auto px-4 py-6">
-        <Tabs defaultValue="maths" className="space-y-6">
-          {/* Sticky Tab Navigation */}
-          <div className="sticky top-32 z-10 bg-white/90 backdrop-blur-sm rounded-lg border border-purple-200 shadow-sm p-2">
-            <TabsList className="grid w-full grid-cols-3 bg-purple-50">
-              <TabsTrigger value="maths" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-                📐 Mathematics
-              </TabsTrigger>
-              <TabsTrigger value="english" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-                📚 English
-              </TabsTrigger>
-              <TabsTrigger value="science" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white">
-                🔬 Science
-              </TabsTrigger>
-            </TabsList>
-          </div>
+      {/* Subject Battle Cards */}
+      <div className="container mx-auto px-4 py-8">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">⚔️ Battle Territory Analysis</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {Object.entries(battleResults.subjects).map(([subjectKey, subject]) => (
+            <Card key={subjectKey} className="border-2 hover:shadow-lg transition-all duration-300 cursor-pointer">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">{subject.icon}</span>
+                    <div>
+                      <CardTitle className="text-xl text-gray-800">{subject.name}</CardTitle>
+                      <Badge className={getSubjectStatusColor(subject.status)}>{subject.status}</Badge>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-gray-800">{subject.accuracy}%</div>
+                    <div className="text-sm text-gray-600">Accuracy</div>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                {/* Progress Bar */}
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Progress</span>
+                    <span className="text-gray-800">{subject.attempted}/{subject.totalQuestions}</span>
+                  </div>
+                  <Progress value={(subject.attempted / subject.totalQuestions) * 100} className="h-3" />
+                </div>
 
-          {/* Tab Contents */}
-          {Object.entries(feedbackData).map(([subjectKey, subject]) => (
-            <TabsContent key={subjectKey} value={subjectKey} className="space-y-6">
-              <div className="text-center mb-6">
-                <h2 className="text-3xl font-bold text-purple-800 mb-2">{subject.name} Performance</h2>
-                <p className="text-purple-600">Detailed chapter-wise analysis and feedback</p>
-              </div>
+                {/* Quick Stats */}
+                <div className="grid grid-cols-4 gap-3">
+                  <div className="text-center p-3 bg-green-50 rounded-lg">
+                    <div className="text-green-700 font-bold">{subject.correct}</div>
+                    <div className="text-xs text-green-600">Correct</div>
+                  </div>
+                  <div className="text-center p-3 bg-red-50 rounded-lg">
+                    <div className="text-red-700 font-bold">{subject.incorrect}</div>
+                    <div className="text-xs text-red-600">Wrong</div>
+                  </div>
+                  <div className="text-center p-3 bg-blue-50 rounded-lg">
+                    <div className="text-blue-700 font-bold">{subject.timeSpent}m</div>
+                    <div className="text-xs text-blue-600">Time</div>
+                  </div>
+                  <div className="text-center p-3 bg-purple-50 rounded-lg">
+                    <div className="text-purple-700 font-bold">{subject.totalMarks}</div>
+                    <div className="text-xs text-purple-600">Marks</div>
+                  </div>
+                </div>
 
-              {subject.topics.map((topic, topicIndex) => {
-                const progress = calculateTopicProgress(topic.chapters);
-                return (
-                  <Card key={topicIndex} className="border-purple-200 shadow-sm">
-                    <CardHeader className="bg-purple-50">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-purple-800 text-xl">{topic.name}</CardTitle>
-                        <div className="flex items-center gap-3">
-                          <div className="text-sm text-purple-600">
-                            Progress: {Math.round(progress)}%
-                          </div>
-                          <Progress value={progress} className="w-24" />
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                      <Accordion type="single" collapsible className="w-full">
-                        <AccordionItem value={`topic-${topicIndex}`} className="border-0">
-                          <AccordionTrigger className="px-6 py-4 hover:bg-purple-25">
-                            <span className="text-purple-700">View {topic.chapters.length} Chapters</span>
-                          </AccordionTrigger>
-                          <AccordionContent className="p-6 pt-0">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {topic.chapters.map((chapter, chapterIndex) => {
-                                const status = getPerformanceStatus(chapter.correct, chapter.incorrect);
-                                const total = chapter.correct + chapter.incorrect;
-                                const percentage = Math.round((chapter.correct / total) * 100);
-                                
-                                return (
-                                  <Card key={chapterIndex} className="border-2 hover:shadow-md transition-shadow">
-                                    <CardHeader className="pb-3">
-                                      <div className="flex items-center justify-between">
-                                        <CardTitle className="text-lg text-gray-800">
-                                          📘 {chapter.name}
-                                        </CardTitle>
-                                        <Badge className={status.color}>{status.text}</Badge>
-                                      </div>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                      {/* Performance Metrics */}
-                                      <div className="grid grid-cols-3 gap-3">
-                                        <div className="text-center p-3 bg-green-50 rounded-lg">
-                                          <div className="flex items-center justify-center gap-1 text-green-700 font-semibold">
-                                            <Check className="w-4 h-4" />
-                                            {chapter.correct}
-                                          </div>
-                                          <p className="text-xs text-green-600 mt-1">Correct</p>
-                                        </div>
-                                        <div className="text-center p-3 bg-red-50 rounded-lg">
-                                          <div className="flex items-center justify-center gap-1 text-red-700 font-semibold">
-                                            <X className="w-4 h-4" />
-                                            {chapter.incorrect}
-                                          </div>
-                                          <p className="text-xs text-red-600 mt-1">Incorrect</p>
-                                        </div>
-                                        <div className="text-center p-3 bg-purple-50 rounded-lg">
-                                          <div className="text-purple-700 font-semibold">
-                                            {percentage}%
-                                          </div>
-                                          <p className="text-xs text-purple-600 mt-1">Score</p>
-                                        </div>
-                                      </div>
-
-                                      {/* Progress Bar */}
-                                      <div className="space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                          <span className="text-gray-600">Performance</span>
-                                          <span className="text-gray-800 font-medium">{chapter.correct}/{total}</span>
-                                        </div>
-                                        <div className="w-full bg-gray-200 rounded-full h-2">
-                                          <div 
-                                            className={`h-2 rounded-full transition-all duration-300 ${getPerformanceColor(chapter.correct, chapter.incorrect)}`}
-                                            style={{ width: `${percentage}%` }}
-                                          ></div>
-                                        </div>
-                                      </div>
-
-                                      {/* Feedback Section */}
-                                      <div className="border-t pt-4">
-                                        <h4 className="text-sm font-medium text-gray-700 mb-2">📝 Analysis & Feedback</h4>
-                                        {editingFeedback === `${subjectKey}-${topicIndex}-${chapterIndex}` ? (
-                                          <div className="space-y-2">
-                                            <textarea
-                                              className="w-full p-3 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                                              rows={3}
-                                              defaultValue={chapter.feedback}
-                                              placeholder="Add your feedback here..."
-                                              onKeyDown={(e) => {
-                                                if (e.key === 'Enter' && e.ctrlKey) {
-                                                  const target = e.target as HTMLTextAreaElement;
-                                                  handleFeedbackSave(subjectKey, topicIndex, chapterIndex, target.value);
-                                                }
-                                              }}
-                                            />
-                                            <div className="flex gap-2">
-                                              <Button 
-                                                size="sm" 
-                                                onClick={(e) => {
-                                                  const button = e.target as HTMLButtonElement;
-                                                  const textarea = button.closest('.space-y-2')?.querySelector('textarea') as HTMLTextAreaElement;
-                                                  if (textarea) {
-                                                    handleFeedbackSave(subjectKey, topicIndex, chapterIndex, textarea.value);
-                                                  }
-                                                }}
-                                                className="bg-purple-600 hover:bg-purple-700"
-                                              >
-                                                Save
-                                              </Button>
-                                              <Button 
-                                                size="sm" 
-                                                variant="outline" 
-                                                onClick={() => setEditingFeedback(null)}
-                                              >
-                                                Cancel
-                                              </Button>
-                                            </div>
-                                          </div>
-                                        ) : (
-                                          <div>
-                                            {chapter.feedback ? (
-                                              <div className="flex items-start justify-between gap-3 p-3 bg-blue-50 rounded-lg">
-                                                <p className="text-sm text-gray-700 flex-1">{chapter.feedback}</p>
-                                                <Button
-                                                  size="sm"
-                                                  variant="ghost"
-                                                  onClick={() => setEditingFeedback(`${subjectKey}-${topicIndex}-${chapterIndex}`)}
-                                                  className="flex-shrink-0 p-1 h-6 w-6 text-gray-500 hover:text-purple-600"
-                                                >
-                                                  <Edit className="w-3 h-3" />
-                                                </Button>
-                                              </div>
-                                            ) : (
-                                              <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => setEditingFeedback(`${subjectKey}-${topicIndex}-${chapterIndex}`)}
-                                                className="w-full border-dashed border-purple-300 text-purple-600 hover:bg-purple-50"
-                                              >
-                                                <Plus className="w-4 h-4 mr-2" />
-                                                Add feedback
-                                              </Button>
-                                            )}
-                                          </div>
-                                        )}
-                                      </div>
-                                    </CardContent>
-                                  </Card>
-                                );
-                              })}
+                {/* Chapter Chips */}
+                <Accordion type="single" collapsible>
+                  <AccordionItem value={subjectKey} className="border-0">
+                    <AccordionTrigger className="text-sm text-gray-600 hover:no-underline">
+                      View Chapter Details ({subject.chapters.length} chapters)
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {subject.chapters.map((chapter, idx) => {
+                          const total = chapter.correct + chapter.incorrect;
+                          const chapterAccuracy = total > 0 ? Math.round((chapter.correct / total) * 100) : 0;
+                          
+                          return (
+                            <div
+                              key={idx}
+                              className={`px-3 py-2 rounded-full text-white text-sm font-medium ${getChipColor(chapter.status)} hover:scale-105 transition-transform cursor-pointer`}
+                              title={`${chapter.name}: ${chapterAccuracy}% (${chapter.correct}/${total})`}
+                            >
+                              {chapter.name} ({chapterAccuracy}%)
                             </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      </Accordion>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </TabsContent>
+                          );
+                        })}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
           ))}
-        </Tabs>
+        </div>
+
+        {/* Performance Insights Panel */}
+        <Card className="mb-8 border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-blue-800">
+              <Brain className="w-6 h-6" />
+              AI Battle Insights
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-white p-4 rounded-lg border border-blue-200">
+              <p className="text-gray-700 leading-relaxed">
+                <strong>💡 Analysis:</strong> You performed excellently in English (86% accuracy) and showed good consistency in Reasoning (79%). 
+                Focus areas include Geometry and Trigonometry in Math, and Current Affairs in GK/GS. 
+                Your time management was efficient across all subjects.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-green-100 p-4 rounded-lg border border-green-200">
+                <h4 className="font-semibold text-green-800 mb-2">🏆 Strengths</h4>
+                <ul className="text-sm text-green-700 space-y-1">
+                  <li>• English Grammar</li>
+                  <li>• Number Series</li>
+                  <li>• Percentage & Average</li>
+                </ul>
+              </div>
+              
+              <div className="bg-yellow-100 p-4 rounded-lg border border-yellow-200">
+                <h4 className="font-semibold text-yellow-800 mb-2">⚠️ Focus Areas</h4>
+                <ul className="text-sm text-yellow-700 space-y-1">
+                  <li>• Geometry concepts</li>
+                  <li>• Current Affairs</li>
+                  <li>• Syllogism reasoning</li>
+                </ul>
+              </div>
+              
+              <div className="bg-blue-100 p-4 rounded-lg border border-blue-200">
+                <h4 className="font-semibold text-blue-800 mb-2">📚 Next Steps</h4>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  <li>• Practice Geometry daily</li>
+                  <li>• Read current affairs</li>
+                  <li>• Solve more syllogisms</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Battle Map */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-gray-800">
+              <Map className="w-6 h-6" />
+              Battle Territory Map
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {Object.entries(battleResults.subjects).map(([subjectKey, subject]) => (
+                <div key={subjectKey} className="text-center">
+                  <h4 className="font-semibold text-gray-700 mb-3">{subject.name}</h4>
+                  <div className="grid grid-cols-2 gap-1">
+                    {subject.chapters.map((chapter, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-8 h-8 rounded-full ${getChipColor(chapter.status)} flex items-center justify-center text-white text-xs font-bold cursor-pointer hover:scale-110 transition-transform`}
+                        title={chapter.name}
+                      >
+                        {idx + 1}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-center gap-6 mt-6 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                <span>Mastered</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
+                <span>Moderate</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                <span>Needs Work</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* CTA Footer */}
+        <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-lg p-4 rounded-t-xl">
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Retry Weak Chapters
+            </Button>
+            <Button variant="outline">
+              <FileText className="w-4 h-4 mr-2" />
+              View Detailed Report
+            </Button>
+            <Button variant="outline">
+              <Share className="w-4 h-4 mr-2" />
+              Share Report
+            </Button>
+            <Button variant="outline">
+              <Download className="w-4 h-4 mr-2" />
+              Download PDF
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
