@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -317,7 +316,8 @@ const BattleAnalysis = () => {
                                               placeholder="Add your feedback here..."
                                               onKeyDown={(e) => {
                                                 if (e.key === 'Enter' && e.ctrlKey) {
-                                                  handleFeedbackSave(subjectKey, topicIndex, chapterIndex, e.target.value);
+                                                  const target = e.target as HTMLTextAreaElement;
+                                                  handleFeedbackSave(subjectKey, topicIndex, chapterIndex, target.value);
                                                 }
                                               }}
                                             />
@@ -325,8 +325,11 @@ const BattleAnalysis = () => {
                                               <Button 
                                                 size="sm" 
                                                 onClick={(e) => {
-                                                  const textarea = e.target.closest('.space-y-2').querySelector('textarea');
-                                                  handleFeedbackSave(subjectKey, topicIndex, chapterIndex, textarea.value);
+                                                  const button = e.target as HTMLButtonElement;
+                                                  const textarea = button.closest('.space-y-2')?.querySelector('textarea') as HTMLTextAreaElement;
+                                                  if (textarea) {
+                                                    handleFeedbackSave(subjectKey, topicIndex, chapterIndex, textarea.value);
+                                                  }
                                                 }}
                                                 className="bg-purple-600 hover:bg-purple-700"
                                               >

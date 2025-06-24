@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart3, Users, Trophy, TrendingUp } from "lucide-react";
+import { BarChart3, Users, Trophy, TrendingUp, FileText, Target } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
@@ -53,19 +53,20 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Main Action Card */}
-        <Card className="max-w-4xl mx-auto border-purple-200 shadow-xl">
-          <CardHeader className="text-center bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-t-lg">
-            <CardTitle className="text-3xl mb-2">Battle Analysis Report</CardTitle>
-            <CardDescription className="text-purple-100 text-lg">
-              Interactive student performance dashboard with detailed chapter-wise analysis
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <div>
-                <h3 className="text-xl font-semibold text-purple-800 mb-4">Key Features</h3>
-                <ul className="space-y-2 text-gray-600">
+        {/* Main Action Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          {/* Battle Analysis Card */}
+          <Card className="border-purple-200 shadow-xl">
+            <CardHeader className="text-center bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-t-lg">
+              <CardTitle className="text-2xl mb-2">Battle Analysis Report</CardTitle>
+              <CardDescription className="text-purple-100">
+                Interactive student performance dashboard with detailed chapter-wise analysis
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-purple-800 mb-3">Key Features</h3>
+                <ul className="space-y-2 text-gray-600 text-sm">
                   <li className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
                     Sticky student summary with key metrics
@@ -73,10 +74,6 @@ const Index = () => {
                   <li className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
                     Subject-wise tabbed navigation
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                    Collapsible topic accordions
                   </li>
                   <li className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
@@ -88,42 +85,60 @@ const Index = () => {
                   </li>
                 </ul>
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-purple-800 mb-4">Design Highlights</h3>
-                <ul className="space-y-2 text-gray-600">
+              
+              <div className="text-center">
+                <Link to="/battle-analysis">
+                  <Button size="lg" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
+                    <FileText className="w-4 h-4 mr-2" />
+                    View Battle Analysis
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* PTS Report Card */}
+          <Card className="border-green-200 shadow-xl">
+            <CardHeader className="text-center bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-t-lg">
+              <CardTitle className="text-2xl mb-2">PTS Mock Test Report</CardTitle>
+              <CardDescription className="text-green-100">
+                Comprehensive mock test performance tracker with chapter-wise input
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-green-800 mb-3">Key Features</h3>
+                <ul className="space-y-2 text-gray-600 text-sm">
                   <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                    Mobile-first responsive design
+                    <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                    Input correct/incorrect scores by chapter
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                    Color-coded performance indicators
+                    <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                    Track time spent and marks per chapter
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                    Progress bars and visual metrics
+                    <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                    Note what went wrong and learning strategies
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                    Smooth transitions and animations
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                    Clean card-based layout
+                    <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                    Real-time performance analysis and progress tracking
                   </li>
                 </ul>
               </div>
-            </div>
-            
-            <div className="text-center">
-              <Link to="/battle-analysis">
-                <Button size="lg" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg">
-                  View Battle Analysis Report
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+              
+              <div className="text-center">
+                <Link to="/pts-report-card">
+                  <Button size="lg" className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white">
+                    <Target className="w-4 h-4 mr-2" />
+                    Enter PTS Report
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Footer */}
         <div className="text-center mt-12 text-gray-500">
