@@ -1,11 +1,11 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, User, Hash, Target, TrendingUp, Clock, CheckCircle, XCircle, Brain, Map, Share, Download, RefreshCw, FileText } from 'lucide-react';
+import { Trophy, User, Hash, Target, TrendingUp, Clock, CheckCircle, XCircle, Brain, Map, Share, Download, RefreshCw, FileText, ArrowLeft } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // Mock analyzed data (would come from PTS Report Card in real app)
 const battleResults = {
@@ -109,7 +109,77 @@ const battleResults = {
 };
 
 const BattleAnalysis = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [expandedSubject, setExpandedSubject] = useState(null);
+
+  // Get data from PTS Report Card or use mock data as fallback
+  const reportData = location.state?.reportData || battleResults.subjects;
+  const studentData = location.state?.studentInfo || battleResults.student;
+
+  // Transform PTS data to battle format
+  const transformedBattleResults = {
+    student: studentData,
+    subjects: Object.entries(reportData).reduce((acc, [key, subject]) => {
+      const stats = calculateSubjectStats(subject.chapters);
+      acc[key] = {
+        name: subject.name,
+        icon: subject.icon,
+        color: subject.color,
+        totalQuestions: stats.totalQuestions,
+        attempted: stats.attempted,
+        correct: stats.correct,
+        incorrect: stats.incorrect,
+        timeSpent: stats.timeSpent,
+        totalMarks: stats.totalMarks,
+        accuracy: Math.round(stats.percentage),
+        status: getStatusFromPercentage(stats.percentage),
+        strongChapters: subject.chapters.filter(ch => getChapterPerformance(ch) === 'excellent').map(ch => ch.name),
+        weakChapters: subject.chapters.filter(ch => getChapterPerformance(ch) === 'weak').map(ch => ch.name),
+        chapters: subject.chapters.map(ch => ({
+          name: ch.name,
+          correct: ch.correct,
+          incorrect: ch.incorrect,
+          status: getChapterPerformance(ch)
+        }))
+      };
+      return acc;
+    }, {})
+  };
+
+  const calculateSubjectStats = (chapters) => {
+    const totalQuestions = chapters.reduce((sum, ch) => sum + ch.correct + ch.incorrect, 0);
+    const attempted = chapters.filter(ch => ch.correct + ch.incorrect > 0).length;
+    const totalCorrect = chapters.reduce((sum, ch) => sum + ch.correct, 0);
+    const totalIncorrect = chapters.reduce((sum, ch) => sum + ch.incorrect, 0);
+    const totalTime = chapters.reduce((sum, ch) => sum + ch.timeSpent, 0);
+    const totalMarks = chapters.reduce((sum, ch) => sum + ch.marks, 0);
+    
+    return {
+      totalQuestions,
+      attempted,
+      correct: totalCorrect,
+      incorrect: totalIncorrect,
+      timeSpent: totalTime,
+      totalMarks,
+      percentage: totalQuestions > 0 ? (totalCorrect / totalQuestions) * 100 : 0
+    };
+  };
+
+  const getChapterPerformance = (chapter) => {
+    const total = chapter.correct + chapter.incorrect;
+    if (total === 0) return 'weak';
+    const percentage = (chapter.correct / total) * 100;
+    if (percentage >= 80) return 'excellent';
+    if (percentage >= 60) return 'good';
+    return 'weak';
+  };
+
+  const getStatusFromPercentage = (percentage) => {
+    if (percentage >= 80) return 'Excellent';
+    if (percentage >= 60) return 'Good';
+    return 'Needs Work';
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -138,6 +208,8 @@ const BattleAnalysis = () => {
     }
   };
 
+  const finalBattleResults = location.state?.reportData ? transformedBattleResults : battleResults;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
       {/* Battle Victory Banner */}
@@ -159,42 +231,42 @@ const BattleAnalysis = () => {
                   <User className="w-5 h-5 text-purple-600" />
                   <div>
                     <p className="text-sm text-gray-600">Warrior</p>
-                    <p className="font-bold text-gray-800">{battleResults.student.name}</p>
+                    <p className="font-bold text-gray-800">{finalBattleResults.student.name}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Hash className="w-5 h-5 text-purple-600" />
                   <div>
                     <p className="text-sm text-gray-600">Battle ID</p>
-                    <p className="font-bold text-gray-800">{battleResults.student.mockNo}</p>
+                    <p className="font-bold text-gray-800">{finalBattleResults.student.mockNo}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-yellow-600" />
                   <div>
                     <p className="text-sm text-gray-600">Rank</p>
-                    <p className="font-bold text-gray-800">#{battleResults.student.rank}</p>
+                    <p className="font-bold text-gray-800">#{finalBattleResults.student.rank}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Target className="w-5 h-5 text-blue-600" />
                   <div>
                     <p className="text-sm text-gray-600">Score</p>
-                    <p className="font-bold text-gray-800">{battleResults.student.totalMarks}/{battleResults.student.maxMarks}</p>
+                    <p className="font-bold text-gray-800">{finalBattleResults.student.totalMarks}/{finalBattleResults.student.maxMarks}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-green-600" />
                   <div>
                     <p className="text-sm text-gray-600">Percentile</p>
-                    <p className="font-bold text-gray-800">{battleResults.student.percentile}%</p>
+                    <p className="font-bold text-gray-800">{finalBattleResults.student.percentile}%</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-5 h-5 text-orange-600" />
                   <div>
                     <p className="text-sm text-gray-600">Time</p>
-                    <p className="font-bold text-gray-800">{battleResults.student.totalTime}min</p>
+                    <p className="font-bold text-gray-800">{finalBattleResults.student.totalTime || 180}min</p>
                   </div>
                 </div>
               </div>
@@ -203,7 +275,7 @@ const BattleAnalysis = () => {
                 <div className="inline-flex items-center gap-4 bg-gradient-to-r from-green-100 to-blue-100 px-6 py-3 rounded-full">
                   <CheckCircle className="w-6 h-6 text-green-600" />
                   <span className="text-lg font-semibold text-gray-800">
-                    Overall Accuracy: {battleResults.student.overallAccuracy}%
+                    Overall Accuracy: {finalBattleResults.student.overallAccuracy || 78}%
                   </span>
                 </div>
               </div>
@@ -217,7 +289,7 @@ const BattleAnalysis = () => {
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">⚔️ Battle Territory Analysis</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {Object.entries(battleResults.subjects).map(([subjectKey, subject]) => (
+          {Object.entries(finalBattleResults.subjects).map(([subjectKey, subject]) => (
             <Card key={subjectKey} className="border-2 hover:shadow-lg transition-all duration-300 cursor-pointer">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -354,7 +426,7 @@ const BattleAnalysis = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {Object.entries(battleResults.subjects).map(([subjectKey, subject]) => (
+              {Object.entries(finalBattleResults.subjects).map(([subjectKey, subject]) => (
                 <div key={subjectKey} className="text-center">
                   <h4 className="font-semibold text-gray-700 mb-3">{subject.name}</h4>
                   <div className="grid grid-cols-2 gap-1">
@@ -391,6 +463,13 @@ const BattleAnalysis = () => {
         {/* CTA Footer */}
         <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-lg p-4 rounded-t-xl">
           <div className="flex flex-wrap justify-center gap-4">
+            <Button 
+              onClick={() => navigate('/pts-report-card')}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Report Card
+            </Button>
             <Button className="bg-purple-600 hover:bg-purple-700 text-white">
               <RefreshCw className="w-4 h-4 mr-2" />
               Retry Weak Chapters

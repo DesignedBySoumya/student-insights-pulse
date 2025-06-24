@@ -1,12 +1,12 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Edit, Save, Check, Trophy, User, Hash, Target, TrendingUp } from 'lucide-react';
+import { Edit, Save, Check, Trophy, User, Hash, Target, TrendingUp, Send, RotateCcw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
+import { useNavigate } from 'react-router-dom';
 
 // Mock student data for PTS Report
 const studentInfo = {
@@ -106,6 +106,7 @@ const ptsSubjects = {
 const PTSReportCard = () => {
   const [subjectData, setSubjectData] = useState(ptsSubjects);
   const [editingField, setEditingField] = useState(null);
+  const navigate = useNavigate();
 
   const getPerformanceStatus = (correct, incorrect) => {
     const total = correct + incorrect;
@@ -147,6 +148,17 @@ const PTSReportCard = () => {
       totalMarks,
       percentage: totalQuestions > 0 ? (totalCorrect / totalQuestions) * 100 : 0
     };
+  };
+
+  const handleSubmit = () => {
+    // Navigate to battle analysis with the current data
+    navigate('/battle-analysis', { state: { reportData: subjectData, studentInfo } });
+  };
+
+  const handleClear = () => {
+    // Reset all data to initial state
+    const clearedData = JSON.parse(JSON.stringify(ptsSubjects));
+    setSubjectData(clearedData);
   };
 
   return (
@@ -349,6 +361,32 @@ const PTSReportCard = () => {
               </Card>
             );
           })}
+        </div>
+
+        {/* Submit and Clear Buttons */}
+        <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t border-purple-200 shadow-lg p-4 rounded-t-xl mt-8">
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button 
+              onClick={handleSubmit}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg"
+              size="lg"
+            >
+              <Send className="w-5 h-5 mr-2" />
+              Submit & Analyze Results
+            </Button>
+            <Button 
+              onClick={handleClear}
+              variant="outline"
+              className="border-purple-600 text-purple-600 hover:bg-purple-50 px-8 py-3 text-lg"
+              size="lg"
+            >
+              <RotateCcw className="w-5 h-5 mr-2" />
+              Clear All Data
+            </Button>
+          </div>
+          <p className="text-center text-sm text-gray-600 mt-2">
+            Submit your data to see detailed battle analysis and insights
+          </p>
         </div>
       </div>
     </div>
