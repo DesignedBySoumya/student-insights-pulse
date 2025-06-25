@@ -161,7 +161,7 @@ const PTSReportCard = () => {
 
   const analytics = calculateAnalytics();
 
-  const getPerformanceStatus = (correct: string, incorrect: string) => {
+  const getPerformanceStatus = (correct, incorrect) => {
     const total = (Number(correct) || 0) + (Number(incorrect) || 0);
     if (total === 0) return { text: 'Not Attempted', color: 'bg-gray-100 text-gray-800' };
     const percentage = ((Number(correct) || 0) / total) * 100;
@@ -170,7 +170,7 @@ const PTSReportCard = () => {
     return { text: 'Needs Work', color: 'bg-red-100 text-red-800' };
   };
 
-  const updateChapterData = (subjectKey: string, chapterIndex: number, field: string, value: string) => {
+  const updateChapterData = (subjectKey, chapterIndex, field, value) => {
     setSubjectData(prev => ({
       ...prev,
       [subjectKey]: {
@@ -189,7 +189,7 @@ const PTSReportCard = () => {
     saveData();
   }, [subjectData]);
 
-  const calculateSubjectStats = (chapters: any[]) => {
+  const calculateSubjectStats = (chapters) => {
     const totalQuestions = chapters.reduce((sum, ch) => sum + (Number(ch.correct) || 0) + (Number(ch.incorrect) || 0), 0);
     const attempted = chapters.filter(ch => (Number(ch.correct) || 0) + (Number(ch.incorrect) || 0) > 0).length;
     const totalCorrect = chapters.reduce((sum, ch) => sum + (Number(ch.correct) || 0), 0);
@@ -218,13 +218,6 @@ const PTSReportCard = () => {
       navigator.share({
         title: 'PTS Mock Test Results',
         text: shareText,
-      }).catch(() => {
-        // Fallback to clipboard if share fails
-        navigator.clipboard.writeText(shareText);
-        toast({
-          title: "Results copied to clipboard!",
-          description: "Share your performance with others",
-        });
       });
     } else {
       navigator.clipboard.writeText(shareText);
@@ -243,7 +236,7 @@ const PTSReportCard = () => {
   };
 
   const handleAddToFlashcards = () => {
-    const mistakes: any[] = [];
+    const mistakes = [];
     Object.entries(subjectData).forEach(([subjectKey, subject]) => {
       subject.chapters.forEach((chapter) => {
         if ((Number(chapter.incorrect) || 0) > 0 && chapter.whatWentWrong) {
@@ -375,7 +368,7 @@ const PTSReportCard = () => {
             };
 
             return (
-              <Card key={subjectKey} className={`${colorMap[subject.color as keyof typeof colorMap]} shadow-lg`}>
+              <Card key={subjectKey} className={`${colorMap[subject.color]} shadow-lg`}>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value={subjectKey} className="border-0">
                     <AccordionTrigger className="px-6 py-4 hover:no-underline">
@@ -402,6 +395,9 @@ const PTSReportCard = () => {
                           <Progress 
                             value={stats.percentage} 
                             className="w-16"
+                            style={{
+                              '--progress-foreground': stats.percentage >= 75 ? '#22c55e' : stats.percentage >= 50 ? '#eab308' : '#ef4444'
+                            }}
                           />
                         </div>
                       </div>
@@ -480,6 +476,9 @@ const PTSReportCard = () => {
                                     <Progress 
                                       value={percentage} 
                                       className="h-3"
+                                      style={{
+                                        '--progress-foreground': percentage >= 75 ? '#22c55e' : percentage >= 50 ? '#eab308' : '#ef4444'
+                                      }}
                                     />
                                   </div>
                                 )}

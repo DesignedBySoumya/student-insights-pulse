@@ -1,84 +1,60 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { ArrowLeft, TrendingUp, TrendingDown, Equal } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 
 const CompareMocks = () => {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState('score');
-  const [mockData, setMockData] = useState<any[]>([]);
+  const [activeView, setActiveView] = useState('score');
 
-  // Generate sample mock data
-  useEffect(() => {
-    const sampleData = [
-      { mock: 'Mock 1', score: 120, accuracy: 65, rank: 1200, percentile: 72 },
-      { mock: 'Mock 2', score: 135, accuracy: 70, rank: 950, percentile: 78 },
-      { mock: 'Mock 3', score: 145, accuracy: 75, rank: 800, percentile: 82 },
-      { mock: 'Mock 4', score: 156, accuracy: 78, rank: 650, percentile: 85 },
-    ];
-    setMockData(sampleData);
-  }, []);
+  // Mock data for previous tests
+  const mockData = [
+    { mock: 'Mock 1', score: 42, accuracy: 65, rank: 1500, percentile: 68, date: '2024-06-01' },
+    { mock: 'Mock 2', score: 38, accuracy: 58, rank: 1800, percentile: 62, date: '2024-06-08' },
+    { mock: 'Mock 3', score: 48, accuracy: 72, rank: 1200, percentile: 75, date: '2024-06-15' },
+    { mock: 'Mock 4', score: 52, accuracy: 78, rank: 980, percentile: 82, date: '2024-06-22' },
+    { mock: 'Current', score: 55, accuracy: 80, rank: 850, percentile: 85, date: '2024-06-25' }
+  ];
 
-  const getChartData = () => {
-    switch (viewMode) {
-      case 'accuracy':
-        return mockData.map(d => ({ name: d.mock, value: d.accuracy, label: 'Accuracy %' }));
-      case 'rank':
-        return mockData.map(d => ({ name: d.mock, value: d.rank, label: 'Rank' }));
-      case 'percentile':
-        return mockData.map(d => ({ name: d.mock, value: d.percentile, label: 'Percentile' }));
-      default:
-        return mockData.map(d => ({ name: d.mock, value: d.score, label: 'Score' }));
-    }
+  // Subject comparison data
+  const subjectData = [
+    { subject: 'Mathematics', mock1: 12, mock2: 10, mock3: 15, mock4: 16, current: 18 },
+    { subject: 'English', mock1: 11, mock2: 9, mock3: 13, mock4: 14, current: 15 },
+    { subject: 'GK/GS', mock1: 8, mock2: 7, mock3: 9, mock4: 11, current: 12 },
+    { subject: 'Reasoning', mock1: 11, mock2: 12, mock3: 11, mock4: 11, current: 10 }
+  ];
+
+  // Radar chart data for current vs average
+  const radarData = [
+    { subject: 'Math', current: 90, average: 75, fullMark: 100 },
+    { subject: 'English', current: 85, average: 70, fullMark: 100 },
+    { subject: 'GK/GS', current: 70, average: 60, fullMark: 100 },
+    { subject: 'Reasoning', current: 65, average: 68, fullMark: 100 }
+  ];
+
+  const getTrendIcon = (current, previous) => {
+    if (current > previous) return <TrendingUp className="w-4 h-4 text-green-600" />;
+    if (current < previous) return <TrendingDown className="w-4 h-4 text-red-600" />;
+    return <Minus className="w-4 h-4 text-gray-600" />;
   };
 
-  const getTrendIcon = () => {
-    if (mockData.length < 2) return <Equal className="w-4 h-4" />;
-    
-    const latest = mockData[mockData.length - 1];
-    const previous = mockData[mockData.length - 2];
-    
-    let currentValue, previousValue;
-    
-    switch (viewMode) {
-      case 'accuracy':
-        currentValue = latest.accuracy;
-        previousValue = previous.accuracy;
-        break;
-      case 'rank':
-        currentValue = latest.rank;
-        previousValue = previous.rank;
-        // For rank, lower is better
-        return currentValue < previousValue ? 
-          <TrendingUp className="w-4 h-4 text-green-500" /> : 
-          <TrendingDown className="w-4 h-4 text-red-500" />;
-      case 'percentile':
-        currentValue = latest.percentile;
-        previousValue = previous.percentile;
-        break;
-      default:
-        currentValue = latest.score;
-        previousValue = previous.score;
-    }
-    
-    return currentValue > previousValue ? 
-      <TrendingUp className="w-4 h-4 text-green-500" /> : 
-      <TrendingDown className="w-4 h-4 text-red-500" />;
+  const getTrendColor = (current, previous) => {
+    if (current > previous) return 'text-green-600';
+    if (current < previous) return 'text-red-600';
+    return 'text-gray-600';
   };
-
-  const chartData = getChartData();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => navigate('/pts-report-card')}
             className="flex items-center gap-2"
           >
@@ -86,107 +62,194 @@ const CompareMocks = () => {
             Back to Report Card
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Compare Mock Performance</h1>
+            <h1 className="text-3xl font-bold text-gray-800">Compare Mock Tests</h1>
             <p className="text-gray-600">Track your progress across multiple mock tests</p>
           </div>
         </div>
 
-        {/* Controls */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <label className="text-sm font-medium text-gray-700">View Mode:</label>
-              <Select value={viewMode} onValueChange={setViewMode}>
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="score">Score over time</SelectItem>
-                  <SelectItem value="accuracy">Accuracy per subject</SelectItem>
-                  <SelectItem value="rank">Rank vs Percentile</SelectItem>
-                  <SelectItem value="percentile">Percentile Progress</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="flex items-center gap-2 ml-auto">
-                <span className="text-sm text-gray-600">Trend:</span>
-                {getTrendIcon()}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* View Toggle */}
+        <div className="flex gap-2 mb-6">
+          <Button
+            variant={activeView === 'score' ? 'default' : 'outline'}
+            onClick={() => setActiveView('score')}
+          >
+            Score Over Time
+          </Button>
+          <Button
+            variant={activeView === 'accuracy' ? 'default' : 'outline'}
+            onClick={() => setActiveView('accuracy')}
+          >
+            Accuracy Trends
+          </Button>
+          <Button
+            variant={activeView === 'rank' ? 'default' : 'outline'}
+            onClick={() => setActiveView('rank')}
+          >
+            Rank vs Percentile
+          </Button>
+          <Button
+            variant={activeView === 'subjects' ? 'default' : 'outline'}
+            onClick={() => setActiveView('subjects')}
+          >
+            Subject Comparison
+          </Button>
+        </div>
 
-        {/* Chart */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Performance Trend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div style={{ width: '100%', height: 400 }}>
-              <ResponsiveContainer>
-                {viewMode === 'rank' ? (
-                  <BarChart data={chartData}>
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Main Chart */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>
+                {activeView === 'score' && 'Score Progress Over Time'}
+                {activeView === 'accuracy' && 'Accuracy Improvement Trends'}
+                {activeView === 'rank' && 'Rank vs Percentile Progress'}
+                {activeView === 'subjects' && 'Subject-wise Performance Comparison'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                {activeView === 'score' && (
+                  <LineChart data={mockData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
+                    <XAxis dataKey="mock" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="value" fill="#8884d8" name={chartData[0]?.label || 'Value'} />
-                  </BarChart>
-                ) : (
-                  <LineChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke="#8884d8" 
-                      strokeWidth={3}
-                      name={chartData[0]?.label || 'Value'}
-                    />
+                    <Line type="monotone" dataKey="score" stroke="#8884d8" strokeWidth={2} />
                   </LineChart>
                 )}
+                {activeView === 'accuracy' && (
+                  <LineChart data={mockData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="mock" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="accuracy" stroke="#82ca9d" strokeWidth={2} />
+                  </LineChart>
+                )}
+                {activeView === 'rank' && (
+                  <LineChart data={mockData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="mock" />
+                    <YAxis yAxisId="left" />
+                    <YAxis yAxisId="right" orientation="right" />
+                    <Tooltip />
+                    <Legend />
+                    <Line yAxisId="left" type="monotone" dataKey="rank" stroke="#ff7300" strokeWidth={2} />
+                    <Line yAxisId="right" type="monotone" dataKey="percentile" stroke="#8884d8" strokeWidth={2} />
+                  </LineChart>
+                )}
+                {activeView === 'subjects' && (
+                  <BarChart data={subjectData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="subject" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="mock1" fill="#8884d8" />
+                    <Bar dataKey="mock2" fill="#82ca9d" />
+                    <Bar dataKey="mock3" fill="#ffc658" />
+                    <Bar dataKey="mock4" fill="#ff7300" />
+                    <Bar dataKey="current" fill="#0088fe" />
+                  </BarChart>
+                )}
               </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Summary Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Radar Chart for Subject Strengths */}
           <Card>
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-gray-700">Latest Score</h3>
-              <p className="text-2xl font-bold text-blue-600">{mockData[mockData.length - 1]?.score || 0}</p>
+            <CardHeader>
+              <CardTitle>Current vs Average Performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={250}>
+                <RadarChart data={radarData}>
+                  <PolarGrid />
+                  <PolarAngleAxis dataKey="subject" />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                  <Radar name="Current" dataKey="current" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+                  <Radar name="Average" dataKey="average" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
+                  <Legend />
+                </RadarChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
+
+          {/* Performance Summary */}
           <Card>
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-gray-700">Best Score</h3>
-              <p className="text-2xl font-bold text-green-600">
-                {Math.max(...mockData.map(d => d.score))}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-gray-700">Best Rank</h3>
-              <p className="text-2xl font-bold text-purple-600">
-                #{Math.min(...mockData.map(d => d.rank))}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-gray-700">Improvement</h3>
-              <p className="text-2xl font-bold text-orange-600">
-                +{mockData.length > 1 ? 
-                  (mockData[mockData.length - 1].score - mockData[0].score) : 0} pts
-              </p>
+            <CardHeader>
+              <CardTitle>Performance Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {mockData.slice(-2).map((mock, index) => (
+                <div key={mock.mock} className="flex justify-between items-center p-3 bg-gray-50 rounded">
+                  <div>
+                    <p className="font-medium">{mock.mock}</p>
+                    <p className="text-sm text-gray-600">{mock.date}</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold">{mock.score}</span>
+                      {index === 1 && getTrendIcon(mock.score, mockData[mockData.length - 2].score)}
+                    </div>
+                    <div className={`text-sm ${index === 1 ? getTrendColor(mock.percentile, mockData[mockData.length - 2].percentile) : 'text-gray-600'}`}>
+                      {mock.percentile}%ile
+                    </div>
+                  </div>
+                </div>
+              ))}
             </CardContent>
           </Card>
         </div>
+
+        {/* Detailed Comparison Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Detailed Mock Comparison</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2">Mock Test</th>
+                    <th className="text-center p-2">Date</th>
+                    <th className="text-center p-2">Score</th>
+                    <th className="text-center p-2">Accuracy</th>
+                    <th className="text-center p-2">Rank</th>
+                    <th className="text-center p-2">Percentile</th>
+                    <th className="text-center p-2">Improvement</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mockData.map((mock, index) => (
+                    <tr key={mock.mock} className="border-b hover:bg-gray-50">
+                      <td className="p-2 font-medium">{mock.mock}</td>
+                      <td className="p-2 text-center">{mock.date}</td>
+                      <td className="p-2 text-center font-bold">{mock.score}</td>
+                      <td className="p-2 text-center">{mock.accuracy}%</td>
+                      <td className="p-2 text-center">{mock.rank}</td>
+                      <td className="p-2 text-center">{mock.percentile}%</td>
+                      <td className="p-2 text-center">
+                        {index > 0 && (
+                          <Badge 
+                            variant={mock.score > mockData[index - 1].score ? "default" : "destructive"}
+                            className="text-xs"
+                          >
+                            {mock.score > mockData[index - 1].score ? '+' : ''}{mock.score - mockData[index - 1].score}
+                          </Badge>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

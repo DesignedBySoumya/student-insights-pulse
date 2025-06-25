@@ -3,88 +3,108 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, Brain, AlertTriangle } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, AlertTriangle, Target, BookOpen, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-
-interface WeakChapter {
-  subject: string;
-  subjectIcon: string;
-  chapter: string;
-  accuracy: number;
-  correct: number;
-  incorrect: number;
-  total: number;
-  learnings: string;
-  whatWentWrong: string;
-}
 
 const ReviewWeakChapters = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [weakChapters, setWeakChapters] = useState<WeakChapter[]>([]);
+  const [weakChapters, setWeakChapters] = useState([]);
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     // Load data from localStorage
     const savedData = localStorage.getItem('pts-report-data');
     if (savedData) {
       try {
-        const reportData = JSON.parse(savedData);
-        const chapters: WeakChapter[] = [];
+        const data = JSON.parse(savedData);
+        const weak = [];
         
-        Object.entries(reportData).forEach(([subjectKey, subject]: [string, any]) => {
-          subject.chapters.forEach((chapter: any) => {
+        Object.entries(data).forEach(([subjectKey, subject]) => {
+          subject.chapters.forEach((chapter, index) => {
             const correct = Number(chapter.correct) || 0;
             const incorrect = Number(chapter.incorrect) || 0;
             const total = correct + incorrect;
             const accuracy = total > 0 ? (correct / total) * 100 : 0;
+            const marks = Number(chapter.marks) || 0;
             
-            // Filter chapters with accuracy < 60% or that have mistakes
-            if ((accuracy < 60 && total > 0) || incorrect > 0) {
-              chapters.push({
+            // Consider weak if accuracy < 60% or marks < 50% of expected
+            if ((total > 0 && accuracy < 60) || (marks > 0 && marks < 5)) {
+              weak.push({
                 subject: subject.name,
                 subjectIcon: subject.icon,
-                chapter: chapter.name,
-                accuracy: Math.round(accuracy),
+                subjectColor: subject.color,
+                chapterName: chapter.name,
                 correct,
                 incorrect,
                 total,
+                accuracy: Math.round(accuracy),
+                marks,
+                timeSpent: Number(chapter.timeSpent) || 0,
+                whatWentWrong: chapter.whatWentWrong || '',
                 learnings: chapter.learnings || '',
-                whatWentWrong: chapter.whatWentWrong || ''
+                subjectKey,
+                chapterIndex: index
               });
             }
           });
         });
         
-        // Sort by accuracy (lowest first)
-        chapters.sort((a, b) => a.accuracy - b.accuracy);
-        setWeakChapters(chapters);
+        setWeakChapters(weak);
       } catch (error) {
-        console.error('Error loading saved data:', error);
+        console.error('Error loading data:', error);
       }
     }
   }, []);
 
-  const handleAddToFlashcards = (chapter: WeakChapter) => {
+  const updateChapterNotes = (subjectKey, chapterIndex, field, value) => {
+    const savedData = localStorage.getItem('pts-report-data');
+    if (savedData) {
+      try {
+        const data = JSON.parse(savedData);
+        data[subjectKey].chapters[chapterIndex][field] = value;
+        localStorage.setItem('pts-report-data', JSON.stringify(data));
+        
+        // Update local state
+        setWeakChapters(prev => prev.map(chapter => 
+          chapter.subjectKey === subjectKey && chapter.chapterIndex === chapterIndex
+            ? { ...chapter, [field]: value }
+            : chapter
+        ));
+      } catch (error) {
+        console.error('Error updating data:', error);
+      }
+    }
+  };
+
+  const addToFlashcards = (chapter) => {
     if (chapter.whatWentWrong) {
       toast({
-        title: "🧠 Added to flashcards!",
-        description: `${chapter.subject} - ${chapter.chapter} mistakes sent to flashcard system`,
+        title: "🧠 Added to Flashcards!",
+        description: `${chapter.subject} - ${chapter.chapterName} mistakes added to flashcards`,
       });
     } else {
       toast({
-        title: "No mistakes noted",
-        description: "Add 'What went wrong' notes first to create effective flashcards",
+        title: "Add mistake details first",
+        description: "Please fill in 'What went wrong' to add to flashcards",
         variant: "destructive"
       });
     }
   };
 
-  const getAccuracyBadge = (accuracy: number) => {
-    if (accuracy < 40) return <Badge className="bg-red-100 text-red-800">Critical</Badge>;
-    if (accuracy < 60) return <Badge className="bg-orange-100 text-orange-800">Needs Work</Badge>;
-    return <Badge className="bg-yellow-100 text-yellow-800">Improve</Badge>;
+  const filteredChapters = weakChapters.filter(chapter => {
+    if (filter === 'accuracy') return chapter.accuracy < 50;
+    if (filter === 'marks') return chapter.marks < 5;
+    return true;
+  });
+
+  const getPerformanceLevel = (accuracy) => {
+    if (accuracy < 30) return { text: 'Critical', color: 'bg-red-100 text-red-800', icon: '🚨' };
+    if (accuracy < 50) return { text: 'Poor', color: 'bg-orange-100 text-orange-800', icon: '⚠️' };
+    if (accuracy < 60) return { text: 'Below Average', color: 'bg-yellow-100 text-yellow-800', icon: '📉' };
+    return { text: 'Needs Work', color: 'bg-blue-100 text-blue-800', icon: '📚' };
   };
 
   return (
@@ -92,8 +112,8 @@ const ReviewWeakChapters = () => {
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => navigate('/pts-report-card')}
             className="flex items-center gap-2"
           >
@@ -105,112 +125,202 @@ const ReviewWeakChapters = () => {
               <AlertTriangle className="w-8 h-8 text-orange-600" />
               Review Weak Chapters
             </h1>
-            <p className="text-gray-600">Focus on chapters that need improvement</p>
+            <p className="text-gray-600">Focus on areas that need improvement</p>
           </div>
         </div>
 
-        {/* Summary */}
-        <Card className="mb-6 bg-gradient-to-r from-orange-500 to-red-500 text-white">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <h3 className="text-lg font-semibold">Chapters to Review</h3>
-                <p className="text-2xl font-bold">{weakChapters.length}</p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold">Critical Areas</h3>
-                <p className="text-2xl font-bold">
-                  {weakChapters.filter(ch => ch.accuracy < 40).length}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold">Average Accuracy</h3>
-                <p className="text-2xl font-bold">
-                  {weakChapters.length > 0 
-                    ? Math.round(weakChapters.reduce((sum, ch) => sum + ch.accuracy, 0) / weakChapters.length)
-                    : 0}%
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Filter Options */}
+        <div className="flex gap-2 mb-6">
+          <Button
+            variant={filter === 'all' ? 'default' : 'outline'}
+            onClick={() => setFilter('all')}
+          >
+            All Weak Areas ({weakChapters.length})
+          </Button>
+          <Button
+            variant={filter === 'accuracy' ? 'default' : 'outline'}
+            onClick={() => setFilter('accuracy')}
+          >
+            Low Accuracy ({weakChapters.filter(c => c.accuracy < 50).length})
+          </Button>
+          <Button
+            variant={filter === 'marks' ? 'default' : 'outline'}
+            onClick={() => setFilter('marks')}
+          >
+            Low Marks ({weakChapters.filter(c => c.marks < 5).length})
+          </Button>
+        </div>
 
-        {/* Weak Chapters Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Chapters Needing Attention</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {weakChapters.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No weak chapters found. Great job!</p>
-                <p className="text-sm text-gray-400">All your chapters have accuracy ≥ 60%</p>
+        {/* Summary Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-red-600">{weakChapters.length}</div>
+              <div className="text-sm text-gray-600">Weak Chapters</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-orange-600">
+                {Math.round(weakChapters.reduce((sum, ch) => sum + ch.accuracy, 0) / weakChapters.length) || 0}%
               </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Subject</TableHead>
-                    <TableHead>Chapter</TableHead>
-                    <TableHead>Performance</TableHead>
-                    <TableHead>Accuracy</TableHead>
-                    <TableHead>What Went Wrong</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {weakChapters.map((chapter, index) => (
-                    <TableRow key={index}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">{chapter.subjectIcon}</span>
-                          <span className="font-medium">{chapter.subject}</span>
+              <div className="text-sm text-gray-600">Average Accuracy</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-blue-600">
+                {weakChapters.reduce((sum, ch) => sum + ch.marks, 0)}
+              </div>
+              <div className="text-sm text-gray-600">Total Marks Lost</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="text-2xl font-bold text-purple-600">
+                {weakChapters.filter(ch => ch.whatWentWrong).length}
+              </div>
+              <div className="text-sm text-gray-600">Analyzed</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Weak Chapters List */}
+        {filteredChapters.length === 0 ? (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <Target className="w-16 h-16 mx-auto text-green-500 mb-4" />
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Great Job!</h3>
+              <p className="text-gray-600">
+                {filter === 'all' 
+                  ? 'No weak chapters found. Keep up the excellent work!'
+                  : 'No chapters match the current filter. Try adjusting your filter settings.'
+                }
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {filteredChapters.map((chapter, index) => {
+              const performance = getPerformanceLevel(chapter.accuracy);
+              
+              return (
+                <Card key={`${chapter.subjectKey}-${chapter.chapterIndex}`} className="border-l-4 border-l-red-400">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{chapter.subjectIcon}</span>
+                        <div>
+                          <CardTitle className="text-lg">{chapter.chapterName}</CardTitle>
+                          <p className="text-sm text-gray-600">{chapter.subject}</p>
                         </div>
-                      </TableCell>
-                      <TableCell className="font-medium">{chapter.chapter}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          {getAccuracyBadge(chapter.accuracy)}
-                          <span className="text-xs text-gray-500">
-                            {chapter.correct}/{chapter.total} correct
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className={`font-bold ${
-                          chapter.accuracy < 40 ? 'text-red-600' : 
-                          chapter.accuracy < 60 ? 'text-orange-600' : 'text-yellow-600'
-                        }`}>
-                          {chapter.accuracy}%
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-xs">
-                          {chapter.whatWentWrong ? (
-                            <p className="text-sm text-gray-600">{chapter.whatWentWrong}</p>
-                          ) : (
-                            <span className="text-xs text-gray-400">No notes added</span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleAddToFlashcards(chapter)}
-                          className="flex items-center gap-1"
-                        >
-                          <Brain className="w-3 h-3" />
-                          Add to Flashcards
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={performance.color}>
+                          {performance.icon} {performance.text}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Performance Stats */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-gray-50 rounded-lg">
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-green-600">{chapter.correct}</div>
+                        <div className="text-xs text-gray-600">Correct</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-red-600">{chapter.incorrect}</div>
+                        <div className="text-xs text-gray-600">Incorrect</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-blue-600">{chapter.accuracy}%</div>
+                        <div className="text-xs text-gray-600">Accuracy</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-purple-600">{chapter.marks}</div>
+                        <div className="text-xs text-gray-600">Marks</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-orange-600">{chapter.timeSpent}</div>
+                        <div className="text-xs text-gray-600">Minutes</div>
+                      </div>
+                    </div>
+
+                    {/* Analysis Section */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block flex items-center gap-1">
+                          <AlertTriangle className="w-4 h-4 text-red-500" />
+                          What went wrong?
+                        </label>
+                        <Textarea
+                          placeholder="Identify specific mistakes and confusion areas..."
+                          value={chapter.whatWentWrong}
+                          onChange={(e) => updateChapterNotes(chapter.subjectKey, chapter.chapterIndex, 'whatWentWrong', e.target.value)}
+                          rows={3}
+                          className="text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-2 block flex items-center gap-1">
+                          <BookOpen className="w-4 h-4 text-blue-500" />
+                          Learning strategy
+                        </label>
+                        <Textarea
+                          placeholder="Plan your revision approach for this chapter..."
+                          value={chapter.learnings}
+                          onChange={(e) => updateChapterNotes(chapter.subjectKey, chapter.chapterIndex, 'learnings', e.target.value)}
+                          rows={3}
+                          className="text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        size="sm"
+                        onClick={() => addToFlashcards(chapter)}
+                        className="flex items-center gap-1"
+                      >
+                        <Brain className="w-4 h-4" />
+                        Add to Flashcards
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => navigate('/pts-report-card')}
+                        className="flex items-center gap-1"
+                      >
+                        <Target className="w-4 h-4" />
+                        Practice More
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Action Footer */}
+        <div className="mt-8 p-6 bg-white rounded-lg shadow-lg">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <h3 className="font-bold text-gray-800">Ready to improve?</h3>
+              <p className="text-gray-600">Focus on these weak areas in your next study session</p>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => navigate('/compare-mocks')} variant="outline">
+                View Progress
+              </Button>
+              <Button onClick={() => navigate('/pts-report-card')}>
+                Back to Report Card
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
