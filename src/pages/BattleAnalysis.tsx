@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -215,7 +214,38 @@ const BattleAnalysis = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-6">
+        {/* AI Insights Panel */}
+        <Card className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Brain className="w-6 h-6 text-blue-600" />
+              <CardTitle className="text-xl text-blue-800">Smart Insights</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {insights.map((insight, idx) => (
+                <div key={idx} className="flex items-start gap-3">
+                  <Star className="w-5 h-5 text-yellow-500 mt-0.5" />
+                  <p className="text-gray-700">{insight}</p>
+                </div>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-3 mt-6">
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Revise Weak Chapters
+              </Button>
+              <Button variant="outline" className="border-blue-600 text-blue-600">
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Retry Mistakes
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Subject Battle Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {Object.entries(reportData).map(([subjectKey, subject]) => {
@@ -293,36 +323,6 @@ const BattleAnalysis = () => {
           })}
         </div>
 
-        {/* AI Insights Panel */}
-        <Card className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Brain className="w-6 h-6 text-blue-600" />
-              <CardTitle className="text-xl text-blue-800">Smart Insights</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {insights.map((insight, idx) => (
-                <div key={idx} className="flex items-start gap-3">
-                  <Star className="w-5 h-5 text-yellow-500 mt-0.5" />
-                  <p className="text-gray-700">{insight}</p>
-                </div>
-              ))}
-            </div>
-            <div className="flex flex-wrap gap-3 mt-6">
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <BookOpen className="w-4 h-4 mr-2" />
-                Revise Weak Chapters
-              </Button>
-              <Button variant="outline" className="border-blue-600 text-blue-600">
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Retry Mistakes
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Battle Map */}
         <Card className="mb-8">
           <CardHeader>
@@ -364,24 +364,41 @@ const BattleAnalysis = () => {
         </Card>
 
         {/* CTA Footer */}
-        <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t border-purple-200 shadow-lg p-4 rounded-t-xl">
+        <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t border-purple-200 shadow-lg p-4 rounded-t-xl mt-8">
           <div className="flex flex-wrap justify-center gap-4">
             <Button 
               onClick={() => navigate('/pts-report-card')}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2"
+              size="lg"
             >
-              <Eye className="w-4 h-4 mr-2" />
+              <RotateCcw className="w-4 h-4 mr-2" />
               View Full Report
             </Button>
-            <Button variant="outline" className="border-purple-600 text-purple-600">
-              <RotateCcw className="w-4 h-4 mr-2" />
-              Retry Weak Areas
+            <Button 
+              onClick={() => {
+                // Collect mistake data for flashcards
+                console.log('Adding mistakes to flashcards...');
+                // TODO: Implement flashcard integration
+              }}
+              variant="outline"
+              className="border-green-600 text-green-600 hover:bg-green-50 px-6 py-2"
+              size="lg"
+            >
+              🧠 Add Mistakes to Flashcards
             </Button>
-            <Button variant="outline" className="border-purple-600 text-purple-600">
+            <Button 
+              variant="outline"
+              className="border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-2"
+              size="lg"
+            >
               <Share className="w-4 h-4 mr-2" />
               Share Report
             </Button>
-            <Button variant="outline" className="border-purple-600 text-purple-600">
+            <Button 
+              variant="outline"
+              className="border-orange-600 text-orange-600 hover:bg-orange-50 px-6 py-2"
+              size="lg"
+            >
               <Download className="w-4 h-4 mr-2" />
               Download PDF
             </Button>
