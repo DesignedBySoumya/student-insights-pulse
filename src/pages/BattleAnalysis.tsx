@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,6 +6,32 @@ import { AlertTriangle, Brain, BarChart3, FileText } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+
+interface Chapter {
+  name: string;
+  correct: string;
+  incorrect: string;
+  timeSpent: string;
+  marks: string;
+  whatWentWrong: string;
+  learnings: string;
+}
+
+interface Subject {
+  name: string;
+  icon: string;
+  color: string;
+  chapters: Chapter[];
+}
+
+interface ReportData {
+  [key: string]: Subject;
+}
+
+interface StudentInfo {
+  name: string;
+  mockNo: string;
+}
 
 const BattleAnalysis = () => {
   const navigate = useNavigate();
@@ -16,7 +43,7 @@ const BattleAnalysis = () => {
     return <div className="min-h-screen flex items-center justify-center">No data available. Please submit the report card first.</div>;
   }
 
-  const calculateSubjectStats = (chapters) => {
+  const calculateSubjectStats = (chapters: Chapter[]) => {
     const totalQuestions = chapters.reduce((sum, ch) => sum + (Number(ch.correct) || 0) + (Number(ch.incorrect) || 0), 0);
     const attempted = chapters.filter(ch => (Number(ch.correct) || 0) + (Number(ch.incorrect) || 0) > 0).length;
     const totalCorrect = chapters.reduce((sum, ch) => sum + (Number(ch.correct) || 0), 0);
@@ -35,7 +62,7 @@ const BattleAnalysis = () => {
     };
   };
 
-  const subjectAnalysis = Object.entries(reportData).map(([subjectKey, subject]) => {
+  const subjectAnalysis = Object.entries(reportData as ReportData).map(([subjectKey, subject]) => {
     const stats = calculateSubjectStats(subject.chapters);
     return {
       name: subject.name,
@@ -50,8 +77,8 @@ const BattleAnalysis = () => {
   const overallAccuracy = totalQuestions > 0 ? (subjectAnalysis.reduce((sum, subject) => sum + subject.correct, 0) / totalQuestions) * 100 : 0;
 
   const handleAddToFlashcards = () => {
-    const mistakes = [];
-    Object.entries(reportData).forEach(([subjectKey, subject]) => {
+    const mistakes: any[] = [];
+    Object.entries(reportData as ReportData).forEach(([subjectKey, subject]) => {
       subject.chapters.forEach((chapter) => {
         if ((Number(chapter.incorrect) || 0) > 0 && chapter.whatWentWrong) {
           mistakes.push({
@@ -201,7 +228,6 @@ const BattleAnalysis = () => {
                   <p className="text-sm">Incorrect: {subject.incorrect}</p>
                   <p className="text-sm">Accuracy: {subject.percentage.toFixed(2)}%</p>
                   <p className="text-sm">Marks: {subject.totalMarks}</p>
-                  {/* Add more detailed analysis here */}
                 </div>
               ))}
             </div>
@@ -219,7 +245,6 @@ const BattleAnalysis = () => {
               <li>Focus on weak areas identified in the subject-wise analysis.</li>
               <li>Review the chapters where you made the most mistakes.</li>
               <li>Practice more questions in those areas.</li>
-              {/* Add more dynamic recommendations here */}
             </ul>
           </CardContent>
         </Card>
