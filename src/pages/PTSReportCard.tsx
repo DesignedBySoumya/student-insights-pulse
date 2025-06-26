@@ -3,12 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Edit, Save, Check, Trophy, User, Hash, Target, TrendingUp, Send, RotateCcw, Share2, Download, FileText, BarChart3 } from 'lucide-react';
+import { Edit, Trophy, User, Hash, Target, TrendingUp, Share2, Download, FileText, BarChart3 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { SubjectData, Chapter } from '@/types/reportTypes';
 
 // Mock student data for PTS Report
 const studentInfo = {
@@ -21,7 +22,7 @@ const studentInfo = {
 };
 
 // PTS Report Card subject structure with chapters
-const ptsSubjects = {
+const ptsSubjects: SubjectData = {
   maths: {
     name: "Mathematics",
     icon: "📐",
@@ -110,7 +111,7 @@ const ptsSubjects = {
 };
 
 const PTSReportCard = () => {
-  const [subjectData, setSubjectData] = useState(ptsSubjects);
+  const [subjectData, setSubjectData] = useState<SubjectData>(ptsSubjects);
   const [saveStatus, setSaveStatus] = useState('');
   const [editableRank, setEditableRank] = useState(false);
   const [customRank, setCustomRank] = useState('');
@@ -161,7 +162,7 @@ const PTSReportCard = () => {
 
   const analytics = calculateAnalytics();
 
-  const getPerformanceStatus = (correct, incorrect) => {
+  const getPerformanceStatus = (correct: string, incorrect: string) => {
     const total = (Number(correct) || 0) + (Number(incorrect) || 0);
     if (total === 0) return { text: 'Not Attempted', color: 'bg-gray-100 text-gray-800' };
     const percentage = ((Number(correct) || 0) / total) * 100;
@@ -170,7 +171,7 @@ const PTSReportCard = () => {
     return { text: 'Needs Work', color: 'bg-red-100 text-red-800' };
   };
 
-  const updateChapterData = (subjectKey, chapterIndex, field, value) => {
+  const updateChapterData = (subjectKey: string, chapterIndex: number, field: keyof Chapter, value: string) => {
     setSubjectData(prev => ({
       ...prev,
       [subjectKey]: {
@@ -189,7 +190,7 @@ const PTSReportCard = () => {
     saveData();
   }, [subjectData]);
 
-  const calculateSubjectStats = (chapters) => {
+  const calculateSubjectStats = (chapters: Chapter[]) => {
     const totalQuestions = chapters.reduce((sum, ch) => sum + (Number(ch.correct) || 0) + (Number(ch.incorrect) || 0), 0);
     const attempted = chapters.filter(ch => (Number(ch.correct) || 0) + (Number(ch.incorrect) || 0) > 0).length;
     const totalCorrect = chapters.reduce((sum, ch) => sum + (Number(ch.correct) || 0), 0);
@@ -236,7 +237,7 @@ const PTSReportCard = () => {
   };
 
   const handleAddToFlashcards = () => {
-    const mistakes = [];
+    const mistakes: any[] = [];
     Object.entries(subjectData).forEach(([subjectKey, subject]) => {
       subject.chapters.forEach((chapter) => {
         if ((Number(chapter.incorrect) || 0) > 0 && chapter.whatWentWrong) {
@@ -368,7 +369,7 @@ const PTSReportCard = () => {
             };
 
             return (
-              <Card key={subjectKey} className={`${colorMap[subject.color]} shadow-lg`}>
+              <Card key={subjectKey} className={`${colorMap[subject.color as keyof typeof colorMap]} shadow-lg`}>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value={subjectKey} className="border-0">
                     <AccordionTrigger className="px-6 py-4 hover:no-underline">
@@ -395,9 +396,6 @@ const PTSReportCard = () => {
                           <Progress 
                             value={stats.percentage} 
                             className="w-16"
-                            style={{
-                              '--progress-foreground': stats.percentage >= 75 ? '#22c55e' : stats.percentage >= 50 ? '#eab308' : '#ef4444'
-                            }}
                           />
                         </div>
                       </div>
@@ -473,13 +471,7 @@ const PTSReportCard = () => {
                                       <span className="text-gray-600">Accuracy</span>
                                       <span className="text-gray-800 font-medium">{percentage}%</span>
                                     </div>
-                                    <Progress 
-                                      value={percentage} 
-                                      className="h-3"
-                                      style={{
-                                        '--progress-foreground': percentage >= 75 ? '#22c55e' : percentage >= 50 ? '#eab308' : '#ef4444'
-                                      }}
-                                    />
+                                    <Progress value={percentage} className="h-3" />
                                   </div>
                                 )}
 

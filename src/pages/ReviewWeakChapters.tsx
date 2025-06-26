@@ -7,11 +7,29 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, AlertTriangle, Target, BookOpen, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { SubjectData } from '@/types/reportTypes';
+
+interface WeakChapter {
+  subject: string;
+  subjectIcon: string;
+  subjectColor: string;
+  chapterName: string;
+  correct: number;
+  incorrect: number;
+  total: number;
+  accuracy: number;
+  marks: number;
+  timeSpent: number;
+  whatWentWrong: string;
+  learnings: string;
+  subjectKey: string;
+  chapterIndex: number;
+}
 
 const ReviewWeakChapters = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [weakChapters, setWeakChapters] = useState([]);
+  const [weakChapters, setWeakChapters] = useState<WeakChapter[]>([]);
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
@@ -19,8 +37,8 @@ const ReviewWeakChapters = () => {
     const savedData = localStorage.getItem('pts-report-data');
     if (savedData) {
       try {
-        const data = JSON.parse(savedData);
-        const weak = [];
+        const data: SubjectData = JSON.parse(savedData);
+        const weak: WeakChapter[] = [];
         
         Object.entries(data).forEach(([subjectKey, subject]) => {
           subject.chapters.forEach((chapter, index) => {
@@ -59,12 +77,12 @@ const ReviewWeakChapters = () => {
     }
   }, []);
 
-  const updateChapterNotes = (subjectKey, chapterIndex, field, value) => {
+  const updateChapterNotes = (subjectKey: string, chapterIndex: number, field: string, value: string) => {
     const savedData = localStorage.getItem('pts-report-data');
     if (savedData) {
       try {
-        const data = JSON.parse(savedData);
-        data[subjectKey].chapters[chapterIndex][field] = value;
+        const data: SubjectData = JSON.parse(savedData);
+        (data[subjectKey].chapters[chapterIndex] as any)[field] = value;
         localStorage.setItem('pts-report-data', JSON.stringify(data));
         
         // Update local state
@@ -79,7 +97,7 @@ const ReviewWeakChapters = () => {
     }
   };
 
-  const addToFlashcards = (chapter) => {
+  const addToFlashcards = (chapter: WeakChapter) => {
     if (chapter.whatWentWrong) {
       toast({
         title: "🧠 Added to Flashcards!",
@@ -100,7 +118,7 @@ const ReviewWeakChapters = () => {
     return true;
   });
 
-  const getPerformanceLevel = (accuracy) => {
+  const getPerformanceLevel = (accuracy: number) => {
     if (accuracy < 30) return { text: 'Critical', color: 'bg-red-100 text-red-800', icon: '🚨' };
     if (accuracy < 50) return { text: 'Poor', color: 'bg-orange-100 text-orange-800', icon: '⚠️' };
     if (accuracy < 60) return { text: 'Below Average', color: 'bg-yellow-100 text-yellow-800', icon: '📉' };

@@ -36,13 +36,13 @@ const CompareMocks = () => {
     { subject: 'Reasoning', current: 65, average: 68, fullMark: 100 }
   ];
 
-  const getTrendIcon = (current, previous) => {
+  const getTrendIcon = (current: number, previous: number) => {
     if (current > previous) return <TrendingUp className="w-4 h-4 text-green-600" />;
     if (current < previous) return <TrendingDown className="w-4 h-4 text-red-600" />;
     return <Minus className="w-4 h-4 text-gray-600" />;
   };
 
-  const getTrendColor = (current, previous) => {
+  const getTrendColor = (current: number, previous: number) => {
     if (current > previous) return 'text-green-600';
     if (current < previous) return 'text-red-600';
     return 'text-gray-600';
@@ -109,7 +109,7 @@ const CompareMocks = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                {activeView === 'score' && (
+                {activeView === 'score' ? (
                   <LineChart data={mockData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="mock" />
@@ -118,8 +118,7 @@ const CompareMocks = () => {
                     <Legend />
                     <Line type="monotone" dataKey="score" stroke="#8884d8" strokeWidth={2} />
                   </LineChart>
-                )}
-                {activeView === 'accuracy' && (
+                ) : activeView === 'accuracy' ? (
                   <LineChart data={mockData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="mock" />
@@ -128,8 +127,7 @@ const CompareMocks = () => {
                     <Legend />
                     <Line type="monotone" dataKey="accuracy" stroke="#82ca9d" strokeWidth={2} />
                   </LineChart>
-                )}
-                {activeView === 'rank' && (
+                ) : activeView === 'rank' ? (
                   <LineChart data={mockData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="mock" />
@@ -140,8 +138,7 @@ const CompareMocks = () => {
                     <Line yAxisId="left" type="monotone" dataKey="rank" stroke="#ff7300" strokeWidth={2} />
                     <Line yAxisId="right" type="monotone" dataKey="percentile" stroke="#8884d8" strokeWidth={2} />
                   </LineChart>
-                )}
-                {activeView === 'subjects' && (
+                ) : (
                   <BarChart data={subjectData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="subject" />
